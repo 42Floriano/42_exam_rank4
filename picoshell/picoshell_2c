@@ -1,0 +1,88 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   picoshell_2c                                       :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: albertini <albertini@student.42.fr>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2024/11/20 23:24:50 by albertini         #+#    #+#             */
+/*   Updated: 2024/11/21 11:15:26 by albertini        ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+//Faire les declaration d'en-tête
+ #include <unistd.h>
+ #include <stdio.h>
+ 
+int picoshell(char ***ends) 
+{
+	//1. compter le nombre de commandes
+	//2. Creer les pipes avec pipe() nCommand -1
+	//3. Créer fork avec pid fork() nCommand
+	//4. Gérer la sortie et entrée avec dup2, stdin, stdout
+	//4.5 fermture des descripteur utilisé par les enfants avec close
+	//5 execution des commandes avec execvp
+	//6. fermeture des pipes parents
+	//7. attente des processus enfants avec wait()
+
+// 	Pages du manuel à consulter
+// 1. man 2 fork
+// Description : Explique comment fork fonctionne pour créer un processus enfant.
+// Informations clés :
+// Retourne 0 dans le processus enfant.
+// Retourne le PID de l'enfant dans le parent.
+// 2. man 2 pipe
+// Description : Explique comment créer un pipe.
+// Informations clés :
+// pipe(int pipefd[2]) : crée deux descripteurs de fichiers (pipefd[0] pour lecture et pipefd[1] pour écriture).
+// Retourne 0 en cas de succès, -1 en cas d'erreur.
+// 3. man 2 dup2
+// Description : Explique comment rediriger un descripteur de fichier.
+// Informations clés :
+// dup2(oldfd, newfd) copie oldfd vers newfd.
+// Utilisé pour rediriger STDIN_FILENO et STDOUT_FILENO.
+// 4. man 3 execvp
+// Description : Explique comment remplacer le processus courant par un nouveau programme.
+// Informations clés :
+// execvp(const char *file, char *const argv[]) exécute le fichier spécifié avec les arguments passés dans argv.
+// argv[0] contient le nom du programme.
+// Si la commande échoue, elle retourne -1.
+// 5. man 2 wait
+// Description : Explique comment attendre qu’un processus enfant se termine.
+// Informations clés :
+// wait(int *wstatus) suspend le parent jusqu'à ce qu'un enfant se termine.
+// Utilisé pour synchroniser les processus.
+// 6. man 2 close
+// Description : Explique comment fermer un descripteur de fichier.
+// Informations clés :
+// close(fd) ferme un descripteur pour éviter des fuites.
+// 7. man 2 exit
+// Description : Explique comment terminer un processus proprement.
+// Informations clés :
+// exit(int status) termine le processus avec un code de retour.
+// 8. man 2 perror
+// Description : Explique comment afficher un message d'erreur.
+// Informations clés :
+// perror(const char *s) affiche s suivi d’une description de l’erreur associée à errno.
+	
+
+return (0);
+}
+
+// Exemple d'utilisation
+int main() {
+    // Exemple : ls | grep .c | wc -l
+    char *cmd1[] = {"ls", NULL};
+    char *cmd2[] = {"grep", ".c", NULL};
+    char *cmd3[] = {"wc", "-l", NULL};
+    char **commands[] = {cmd1, cmd2, cmd3, NULL};
+
+    // Appeler picoshell
+    if (picoshell(commands) == -1) {
+        fprintf(stderr, "Erreur dans l'exécution de picoshell.\n");
+        return EXIT_FAILURE;
+    }
+
+    return EXIT_SUCCESS;
+}
+
