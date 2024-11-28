@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   picoshell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: albertini <albertini@student.42.fr>        +#+  +:+       +#+        */
+/*   By: falberti <falberti@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 23:24:50 by albertini         #+#    #+#             */
-/*   Updated: 2024/11/27 11:39:53 by albertini        ###   ########.fr       */
+/*   Updated: 2024/11/28 17:37:56 by falberti         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,95 +14,61 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <errno.h>
 
-int picoshell(char ***ends) {
-    int num_commands = 0;
+// Error handling function
+int ret_err(char *msg, int err) {
+    perror(msg);
+    exit(err);
+}
 
-    // Compter le nombre de commandes avec une boucle while
-    while (ends[num_commands] != NULL) {
-        num_commands++;
+int picoshell(char **args[]) {
+    int i, nCommands = 0;
+    // 1. Count the number of commands (args array ends with NULL)
+    while (args[nCommands] != NULL) {
+        nCommands++;
     }
-
-    if (num_commands == 0) {
-        fprintf(stderr, "Erreur : aucune commande fournie.\n");
-        return -1;
+    if (nCommands == 0) {   ret_err("No commands provided", -1);}
+    // 2. Create pipes
+    int pipes[nCommands - 1][2];
+    for (i = 0; i < nCommands - 1; i++) {
+        if (pipe(pipes[i]) == -1) { ret_err("pipe", EXIT_FAILURE);}
     }
-
-    // Création des pipes
-    int pipes[num_commands - 1][2];
-    int i = 0;
-
-    while (i < num_commands - 1) {
-        if (pipe(pipes[i]) == -1) {
-            perror("pipe");
-            return -1;
-        }
-        i++;
-    }
-
-    // Gestion des processus avec une boucle while
-    i = 0;
-    while (i < num_commands) 
-	{
-        pid_t pid = fork();
-
-        if (pid == -1) {
-            perror("fork");
-            return -1;
-        }
-
-        if (pid == 0) { // Processus enfant
-            // Redirection d'entrée pour toutes sauf la première commande
-            if (i > 0) {
-                if (dup2(pipes[i - 1][0], STDIN_FILENO) == -1) {
-                    perror("dup2 stdin");
-                    exit(EXIT_FAILURE);
-                }
+    // 3. Fork processes for each command
+    for (i = 0; i < nCommands; i++) {
+        int pid = fork();
+        if (pid == -1) { ret_err("fork", EXIT_FAILURE);}
+        if (pid == 0) { // Child process
+            // 4. Redirect stdin/stdout as needed
+            if (i > 0) { // Not the first command: read from previous pipe
+                if (dup2(pipes[i - 1][0], STDIN_FILENO) == -1) {ret_err("dup2 input", EXIT_FAILURE);}
+            }
+            if (i < nCommands - 1) { // Not the last command: write to next pipe
+                if (dup2(pipes[i][1], STDOUT_FILENO) == -1) { ret_err("dup2 output", EXIT_FAILURE); }
             }
 
-            // Redirection de sortie pour toutes sauf la dernière commande
-            if (i < num_commands - 1) {
-                if (dup2(pipes[i][1], STDOUT_FILENO) == -1) {
-                    perror("dup2 stdout");
-                    exit(EXIT_FAILURE);
-                }
-            }
-
-            // Fermer tous les pipes inutiles dans l'enfant
-            int j = 0;
-            while (j < num_commands - 1) {
+            // 4.5 Close all pipe ends not needed by this child
+            for (int j = 0; j < nCommands - 1; j++) {
                 close(pipes[j][0]);
                 close(pipes[j][1]);
-                j++;
             }
 
-            // Exécuter la commande
-            if (execvp(ends[i][0], ends[i]) == -1) {
-                perror("execvp");
-                exit(EXIT_FAILURE);
-            }
+            // 5. Execute the command
+            if (execvp(args[i][0], args[i]) == -1) { ret_err("execvp", EXIT_FAILURE); } // If execvp fails
         }
-
-        i++;
     }
 
-    // Parent : Fermer tous les pipes inutilisés
-    i = 0;
-    while (i < num_commands - 1) {
+    // 6. Parent process closes all pipe ends
+    for (i = 0; i < nCommands - 1; i++) {
         close(pipes[i][0]);
         close(pipes[i][1]);
-        i++;
     }
 
-    // Attendre tous les processus enfants avec une boucle while
-    i = 0;
-    while (i < num_commands) {
-        if (wait() == -1) {
-            perror("wait");
+    // 7. Wait for all child processes
+        if (wait(NULL) == -1 || errno == ECHILD) {
+            ret_err("wait", EXIT_FAILURE);
         }
-        i++;
-    }
-
+    
     return 0;
 }
 
