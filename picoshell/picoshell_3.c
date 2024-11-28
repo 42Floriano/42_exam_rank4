@@ -6,7 +6,7 @@
 /*   By: albertini <albertini@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/28 20:21:01 by albertini         #+#    #+#             */
-/*   Updated: 2024/11/28 21:53:00 by albertini        ###   ########.fr       */
+/*   Updated: 2024/11/28 21:58:53 by albertini        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,12 @@ void	ret_err(char *msg, int err)
 int picoshell(char **cmds[])
 {
 	int nCommand = 0, i = 0;
+	//Count n command
 	while (cmds[nCommand])
 		nCommand++;
+	//Error if no command passed
 	if (nCommand == 0) {ret_err("No commands passed", 1);}
+	//Create all pipes
 	int pipes[nCommand - 1][2];
 	for (i = 0; i < nCommand - 1; i++){
 		if (pipe(pipes[i]) == -1){ ret_err("Pipe error", 1);}
@@ -37,12 +40,15 @@ int picoshell(char **cmds[])
 		int pid = fork();
 		if (pid == -1){ret_err("PID error", 1);}
 		if (pid == 0){
+			//If not first command
 			if(i > 0){
 				if (dup2(pipes[i - 1][0], STDIN_FILENO) == -1){ret_err("Dup2 in error", 1);}
 			}
+			//If not last command
 			if(i < nCommand - 1){
 				if (dup2(pipes[i][1], STDOUT_FILENO) == -1){ret_err("Dup2 out error", 1);}
 			}
+			//Close all children pipes
 			for (int y = 0; y < nCommand - 1; y++){
 				close(pipes[y][0]);
 				close(pipes[y][1]);
@@ -58,7 +64,7 @@ int picoshell(char **cmds[])
 	//wait all chidren to finish and check return error in children process
 	int wstatus;
 	for (i = 0; i < nCommand; i++) {
-    if (wait(&wstatus) == -1) { ret_err("Wait error", 1); }
+	if (wait(&wstatus) == -1) { ret_err("Wait error", 1); }
 	if(WIFEXITED(wstatus)){
 		int nstatus = WEXITSTATUS(wstatus);
 		if (nstatus == 0){}
@@ -71,12 +77,12 @@ int picoshell(char **cmds[])
 }
 
 int main() {
-    char *cmd1[] = {"ls", "-l", NULL};
-    char *cmd2[] = {"grep", ".c", NULL};
-   	char *cmd3[] = {"wc", "-l", NULL};
-    char **commands[] = {cmd1, cmd2, cmd3,  NULL};
+	char *cmd1[] = {"ls", "-l", NULL};
+	char *cmd2[] = {"grep", ".c", NULL};
+	char *cmd3[] = {"wc", "-l", NULL};
+	char **commands[] = {cmd1, cmd2, cmd3,  NULL};
 
-    picoshell(commands);
+	picoshell(commands);
 
-    return 0;
+	return 0;
 }
