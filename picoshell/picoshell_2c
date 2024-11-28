@@ -6,7 +6,7 @@
 /*   By: albertini <albertini@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 23:24:50 by albertini         #+#    #+#             */
-/*   Updated: 2024/11/27 00:10:06 by albertini        ###   ########.fr       */
+/*   Updated: 2024/11/27 11:40:25 by albertini        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,11 +40,47 @@ int picoshell(char **args[])
 	}
 	for (int i = 0; i < nCommand; i++)
 	{
-		pid_t pid;
-		
+		pid_t pid = fork();
+		if (pid == -1)
+		{
+			perror("Fork error");
+			exit(EXIT_FAILURE);
+		}
+		if (pid == 0)
+		{
+		//if it's not the first command do this:
+		if (i > 0)
+			dup2(pipes[i - 1][0], STDIN_FILENO);
+		//if it's not the last command do this:
+		if (i < nCommand - 1)
+			dup2(pipes[i][1], STDIN_FILENO);
+		//after giving stdin and stdout close the in and out
+		for (int j = 0; j < nCommand - 1; j++)
+		{
+			close(pipes[j][0]);
+			close(pipes[j][1]);
+		}
+		//execute command
+		if (execvp(args[i][0], args[i]) == -1)
+		{
+			perrro("execvp error");
+			exit(EXIT_FAILURE);
+		}
+		}
 	}
-	
-	
+	for (int j = 0; j < nCommand - 1; j++)
+	{
+		close(pipes[j][0]);
+		close(pipes[j][1]);
+	}
+	for (int y = 0; y < nCommand; y++)
+	{
+		if (wait() == -1)
+		{
+			perror("wait error");
+			exit(EXIT_FAILURE);
+		}
+	}
 		
 	//1. compter le nombre de commandes
 	

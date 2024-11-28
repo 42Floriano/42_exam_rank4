@@ -6,7 +6,7 @@
 /*   By: albertini <albertini@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 23:24:50 by albertini         #+#    #+#             */
-/*   Updated: 2024/11/21 11:09:15 by albertini        ###   ########.fr       */
+/*   Updated: 2024/11/27 11:39:53 by albertini        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,7 +97,7 @@ int picoshell(char ***ends) {
     // Attendre tous les processus enfants avec une boucle while
     i = 0;
     while (i < num_commands) {
-        if (wait(NULL) == -1) {
+        if (wait() == -1) {
             perror("wait");
         }
         i++;
