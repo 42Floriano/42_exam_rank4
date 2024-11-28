@@ -6,7 +6,7 @@
 /*   By: albertini <albertini@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/28 20:21:01 by albertini         #+#    #+#             */
-/*   Updated: 2024/11/28 20:54:31 by albertini        ###   ########.fr       */
+/*   Updated: 2024/11/28 21:53:00 by albertini        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,8 +61,7 @@ int picoshell(char **cmds[])
     if (wait(&wstatus) == -1) { ret_err("Wait error", 1); }
 	if(WIFEXITED(wstatus)){
 		int nstatus = WEXITSTATUS(wstatus);
-		if (nstatus == 0)
-			printf("Success");
+		if (nstatus == 0){}
 		else 
 			printf("Faillure, code: %d", nstatus);
 	}
@@ -71,12 +70,11 @@ int picoshell(char **cmds[])
 	return (0);
 }
 
-
 int main() {
     char *cmd1[] = {"ls", "-l", NULL};
     char *cmd2[] = {"grep", ".c", NULL};
-    char *cmd3[] = {"wc", "-l", NULL};
-    char **commands[] = {cmd1, cmd2, cmd3, NULL};
+   	char *cmd3[] = {"wc", "-l", NULL};
+    char **commands[] = {cmd1, cmd2, cmd3,  NULL};
 
     picoshell(commands);
 
