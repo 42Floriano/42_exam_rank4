@@ -6,7 +6,7 @@
 /*   By: albertini <albertini@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/28 20:21:01 by albertini         #+#    #+#             */
-/*   Updated: 2024/11/28 21:58:53 by albertini        ###   ########.fr       */
+/*   Updated: 2024/11/28 22:06:02 by albertini        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,12 +64,12 @@ int picoshell(char **cmds[])
 	//wait all chidren to finish and check return error in children process
 	int wstatus;
 	for (i = 0; i < nCommand; i++) {
-	if (wait(&wstatus) == -1) { ret_err("Wait error", 1); }
-	if(WIFEXITED(wstatus)){
-		int nstatus = WEXITSTATUS(wstatus);
-		if (nstatus == 0){}
-		else 
-			printf("Faillure, code: %d", nstatus);
+		if (wait(&wstatus) == -1) { ret_err("Wait error", 1); }
+		if(WIFEXITED(wstatus)){
+			int nstatus = WEXITSTATUS(wstatus);
+			if (nstatus == 0){}
+			else 
+				printf("Faillure, code: %d", nstatus);
 	}
 	}
 	
