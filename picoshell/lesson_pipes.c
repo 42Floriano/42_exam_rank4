@@ -6,7 +6,7 @@
 /*   By: falberti <falberti@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/28 11:31:12 by albertini         #+#    #+#             */
-/*   Updated: 2024/12/02 12:34:14 by falberti         ###   ########.fr       */
+/*   Updated: 2024/12/02 16:23:02 by falberti         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -214,39 +214,80 @@
 // 	return (0);
 // }
 
-int ret_err(char *msg, int err)
+// int ret_err(char *msg, int err)
+// {
+// 	perror(msg);
+// 	exit(err);
+// }
+
+// int main(int ac, char** av)
+// {
+// 	int pipes[2];
+// 	if (pipe(pipes) == -1) {ret_err("error pipes", 1);}
+// 	int pid = fork();
+// 	if (pid == -1){ret_err("error fork", 1);}
+// 	if (pid == 0){
+// 		close(pipes[0]);
+// 		int i, n;
+// 		char str[200];
+// 		printf("String to pass: ");
+// 		fgets(str, 200, stdin);
+// 		str[strlen(str) - 1] = '\0';
+// 		n = strlen(str);
+// 		if (write(pipes[1], &n, sizeof(int)) < 0) {ret_err("error write", 1);}
+// 		if (write(pipes[1], str, strlen(str) + 1) < 0) {ret_err("error write", 1);}
+// 		close(pipes[1]);
+// 	} else {
+// 		close(pipes[1]);
+// 		int n;
+// 		char str[200];
+// 		sleep(1);
+// 		if (read(pipes[0], &n, sizeof(int)) < 0){ret_err("error write", 1);}
+// 		if (read(pipes[0], str, n) < 0){ret_err("error write", 1);}
+// 		printf("Recieved: %s \n", str);
+// 		close(pipes[0]);
+// 		wait(NULL);
+// 	}
+// 	return (0);
+// }
+
+void	ret_err(char *msg, int err)
 {
 	perror(msg);
 	exit(err);
 }
 
-int main(int ac, char** av)
+int	main(int ac, char **av)
 {
+	char *cmd[] = {"ls", "-l", NULL};
+	char *cmd2[] = {"wc", "-l", NULL};
+	(void)ac;
+	(void)av;
 	int pipes[2];
-	if (pipe(pipes) == -1) {ret_err("error pipes", 1);}
-	int pid = fork();
-	if (pid == -1){ret_err("error fork", 1);}
-	if (pid == 0){
-		close(pipes[0]);
-		int i, n;
-		char str[200];
-		printf("String to pass: ");
-		fgets(str, 200, stdin);
-		str[strlen(str) - 1] = '\0';
-		n = strlen(str);
-		if (write(pipes[1], &n, sizeof(int)) < 0) {ret_err("error write", 1);}
-		if (write(pipes[1], str, strlen(str) + 1) < 0) {ret_err("error write", 1);}
+	if (pipe(pipes) == -1) {ret_err("Error pipe", 1);}
+
+	int pid1 = fork();
+	if (pid1 == -1) {ret_err("Error fork", 1);}
+	if (pid1 == 0){
+		//Child Process
+		dup2(pipes[1], 1);
+		printf("I'm a test\n");
 		close(pipes[1]);
-	} else {
-		close(pipes[1]);
-		int n;
-		char str[200];
-		sleep(1);
-		if (read(pipes[0], &n, sizeof(int)) < 0){ret_err("error write", 1);}
-		if (read(pipes[0], str, n) < 0){ret_err("error write", 1);}
-		printf("String passed: %s \n", str);
 		close(pipes[0]);
-		wait(NULL);
+		execvp(cmd[0], cmd);
 	}
+	int pid2 = fork();
+	if (pid2 == -1) {ret_err("Error fork", 1);}
+	if (pid2 == 0){
+		//Child Process
+		dup2(pipes[0], 0);
+		close(pipes[1]);
+		close(pipes[0]);
+		execvp(cmd2[0], cmd2);
+	}
+	close(pipes[1]);
+	close(pipes[0]);
+	waitpid(pid1, NULL, 0);
+	waitpid(pid2, NULL, 0);
 	return (0);
 }
