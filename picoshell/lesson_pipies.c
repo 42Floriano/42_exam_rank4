@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   lesson_pipies.c                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: falberti <falberti@student.42.fr>          +#+  +:+       +#+        */
+/*   By: albertini <albertini@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/28 11:31:12 by albertini         #+#    #+#             */
-/*   Updated: 2024/11/28 16:40:17 by falberti         ###   ########.fr       */
+/*   Updated: 2024/12/01 13:17:38 by albertini        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 #include <sys/wait.h>
 #include <errno.h>
 #include <stdlib.h>
+#include <signal.h>
 
 // int	main(int ac, char **av)
 // {
@@ -119,42 +120,50 @@
 // }
 
 
+// int ret_err(char *msg, int err)
+// {
+// 	perror(msg);
+// 	exit(err);
+// }
+
+// int main(int ac, char** av)
+// {
+// 	int pid = fork();
+// 	if (pid == -1) {ret_err("pidproblem", 1);}
+// 	if (pid == 0){
+// 		while (1){
+// 			printf("I'm an infinite loop!\n");
+// 		}
+// 	} else {
+// 		kill(pid, SIGSTOP);
+// 		sleep(5);
+// 		kill(pid, SIGCONT);
+// 		sleep(2);
+// 		kill(pid, SIGABRT);
+// 	}
+// 	return (0);
+// }
+
 int ret_err(char *msg, int err)
 {
 	perror(msg);
 	exit(err);
 }
 
+void handle_stop(int sig)
+{
+	printf("Stop process not allowed!");
+}
+
 int main(int ac, char** av)
 {
-	char *cmd1[] = {"ls", "-l", NULL};
-    char *cmd2[] = {"grep", ".c", NULL};
-    char *cmd3[] = {"wc", "-l", NULL};
-    char **commands[] = {cmd1, cmd2, cmd3, NULL};
-
-	int p1[2];
-	int p2[2];
-	if (pipe(p1) == -1) { return 2;}
-	if (pipe(p2) == -1) { return 2;}
-
-	int id = fork();
-	if (id == -1) {return 3;}
-	
-	if (id == 0)
-	{
-		if (execvp(commands[0][0], commands[0]) == -1) {ret_err("exevp error", 5);}
-	} else {
-		int wstatus;
-		wait(&wstatus);
-		if (WIFEXITED(wstatus))
-		{
-		int status_code = WEXITSTATUS(wstatus);
-		if (status_code == 0)
-			printf("Succes! withcode %d \n", status_code);
-		} else {
-			printf("Faillure");
-		}
-	}
-	
+	struct sigaction sa;
+	sa.sa_handler = &handle_stop;
+	sa.sa_flags = SA_RESTART;
+	sigaction(SIGTSTP, &sa, NULL);
+	int x;
+	printf("Choose a number to multiply by 5: ");
+	scanf("%d", &x);
+	printf("The result of %d by 5 is: %d", x, x * 5);
 	return (0);
 }
