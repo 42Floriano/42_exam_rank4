@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   lesson_pipies.c                                    :+:      :+:    :+:   */
+/*   lesson_pipes.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: albertini <albertini@student.42.fr>        +#+  +:+       +#+        */
+/*   By: falberti <falberti@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/28 11:31:12 by albertini         #+#    #+#             */
-/*   Updated: 2024/12/01 13:17:38 by albertini        ###   ########.fr       */
+/*   Updated: 2024/12/02 12:34:14 by falberti         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <signal.h>
+#include <time.h>
+#include <string.h>
 
 // int	main(int ac, char **av)
 // {
@@ -144,26 +146,107 @@
 // 	return (0);
 // }
 
+// int ret_err(char *msg, int err)
+// {
+// 	perror(msg);
+// 	exit(err);
+// }
+
+// void handle_stop(int sig)
+// {
+// 	printf("Stop process not allowed!");
+// }
+
+// int main(int ac, char** av)
+// {
+// 	struct sigaction sa;
+// 	sa.sa_handler = &handle_stop;
+// 	sa.sa_flags = SA_RESTART;
+// 	sigaction(SIGTSTP, &sa, NULL);
+// 	int x;
+// 	printf("Choose a number to multiply by 5: ");
+// 	scanf("%d", &x);
+// 	printf("The result of %d by 5 is: %d", x, x * 5);
+// 	return (0);
+// }
+
+
+// int ret_err(char *msg, int err)
+// {
+// 	perror(msg);
+// 	exit(err);
+// }
+
+// int main(int ac, char** av)
+// {
+// 	int pipes[2];
+// 	if (pipe(pipes) == -1) {ret_err("error pipes", 1);}
+// 	int pid = fork();
+// 	if (pid == -1){ret_err("error fork", 1);}
+// 	if (pid == 0){
+// 		close(pipes[0]);
+// 		int i, n;
+// 		int arr[10];
+// 		srand(time(NULL));
+// 		n = rand() % 10 + 1;
+// 		for (i = 0; i < n; i++){
+// 			arr[i] = rand() % 11;
+// 			printf("The number %d has been generated and added at p %d \n", arr[i], i);
+// 		}
+// 		if (write(pipes[1], &n, sizeof(int)) < 0) {ret_err("error write", 1);}
+// 		if (write(pipes[1], arr, sizeof(int) * n) < 0) {ret_err("error write", 1);}
+// 		close(pipes[1]);
+// 	} else {
+// 		close(pipes[1]);
+// 		int n, sum;
+// 		int arr[10];
+// 		sleep(1);
+// 		if (read(pipes[0], &n, sizeof(int)) < 0){ret_err("error write", 1);}
+// 		if (read(pipes[0], arr, sizeof(int) * n) < 0){ret_err("error write", 1);}
+// 		sum = 0;
+// 		for (int i = 0; i < n; i++){
+// 			sum += arr[i];
+// 		}
+// 		printf("Sum of the array in the mom process: %d \n", sum);
+// 		close(pipes[0]);
+// 		wait(NULL);
+// 	}
+// 	return (0);
+// }
+
 int ret_err(char *msg, int err)
 {
 	perror(msg);
 	exit(err);
 }
 
-void handle_stop(int sig)
-{
-	printf("Stop process not allowed!");
-}
-
 int main(int ac, char** av)
 {
-	struct sigaction sa;
-	sa.sa_handler = &handle_stop;
-	sa.sa_flags = SA_RESTART;
-	sigaction(SIGTSTP, &sa, NULL);
-	int x;
-	printf("Choose a number to multiply by 5: ");
-	scanf("%d", &x);
-	printf("The result of %d by 5 is: %d", x, x * 5);
+	int pipes[2];
+	if (pipe(pipes) == -1) {ret_err("error pipes", 1);}
+	int pid = fork();
+	if (pid == -1){ret_err("error fork", 1);}
+	if (pid == 0){
+		close(pipes[0]);
+		int i, n;
+		char str[200];
+		printf("String to pass: ");
+		fgets(str, 200, stdin);
+		str[strlen(str) - 1] = '\0';
+		n = strlen(str);
+		if (write(pipes[1], &n, sizeof(int)) < 0) {ret_err("error write", 1);}
+		if (write(pipes[1], str, strlen(str) + 1) < 0) {ret_err("error write", 1);}
+		close(pipes[1]);
+	} else {
+		close(pipes[1]);
+		int n;
+		char str[200];
+		sleep(1);
+		if (read(pipes[0], &n, sizeof(int)) < 0){ret_err("error write", 1);}
+		if (read(pipes[0], str, n) < 0){ret_err("error write", 1);}
+		printf("String passed: %s \n", str);
+		close(pipes[0]);
+		wait(NULL);
+	}
 	return (0);
 }
