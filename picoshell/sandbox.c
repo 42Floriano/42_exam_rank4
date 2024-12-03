@@ -6,7 +6,7 @@
 /*   By: albertini <albertini@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 16:53:48 by albertini         #+#    #+#             */
-/*   Updated: 2024/12/03 17:30:10 by albertini        ###   ########.fr       */
+/*   Updated: 2024/12/03 23:32:46 by albertini        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,33 +31,39 @@ void ret_err(char *msg, int err){
 
 int sandbox(void (*f)(void), unsigned int timeout, bool verbose)
 {
-	(void)verbose;
-	(void)f;
 	int fd = fork();
-	if (fd == -1){ret_err("error fork", -1);}
+	if (fd == -1){return (-1);}
 	if (fd == 0){
 		struct sigaction sa;
 		sa.sa_handler = &handle_alarm;
 		sigaction(SIGALRM, &sa, NULL);
 		alarm(timeout);
-		printf("Child starts a long process\n");
-		sleep(10);
-		printf("Child finishes a long process\n");
-		exit(0);
+		f();
+		//sleep(10);
 	}else{
 		int wstatus;
-		waitpid(-1, &wstatus, 0);
+		if (waitpid(-1, &wstatus, 0) == -1) {return (-1);};
         if (WIFEXITED(wstatus)) {
-            printf("Parent process: Child exited with status %d.\n", WEXITSTATUS(wstatus));
+			if(WEXITSTATUS(wstatus) == 10){
+				if (verbose){printf("Timeout after %d seconds", timeout);}
+				return (0);
+			} else if(WEXITSTATUS(wstatus) == 0){
+				if (verbose){printf("Nice function");}
+				return (1);
+			} else {
+				if (verbose){printf("Exited with exit %d", WEXITSTATUS(wstatus));}
+				return (0);
+			}
         } else if (WIFSIGNALED(wstatus)) {
-            printf("Parent process: Child killed by signal %d.\n", WTERMSIG(wstatus));
+            if (verbose){printf("Parent process: Child killed by signal %d.\n", WTERMSIG(wstatus));}
+			return (0);
         }
 	}
 	return (1);
 }
 
 void test(void){
-	printf("tes\n");
+	printf("test function\n");
 }
 
 int main (void){
