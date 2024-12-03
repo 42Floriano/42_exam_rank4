@@ -6,7 +6,7 @@
 /*   By: albertini <albertini@student.42.fr>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/28 20:21:01 by albertini         #+#    #+#             */
-/*   Updated: 2024/11/29 17:14:16 by albertini        ###   ########.fr       */
+/*   Updated: 2024/12/02 17:43:20 by albertini        ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,7 @@ int picoshell(char **cmds[])
 			}
 			if (execvp(cmds[i][0], cmds[i]) == -1){ret_err("Execvp error", 1);}
 	}
+	//wait(NULL);
 	}
 	//Close all parent pipes
 	for (i = 0; i < nCommand - 1; i++){
@@ -62,16 +63,19 @@ int picoshell(char **cmds[])
 		close(pipes[i][1]);
 	}
 	//wait all chidren to finish and check return error in children process
-	int wstatus;
-	for (i = 0; i < nCommand - 1; i++) {
-		if (wait(&wstatus) == -1) { ret_err("Wait error", 1); }
-		if(WIFEXITED(wstatus)){
-			int nstatus = WEXITSTATUS(wstatus);
-			if (nstatus == 0){}
-			else 
-				printf("Faillure, code: %d", nstatus);
+	for (i = 0; i < nCommand - 1; i++){
+		wait(NULL);
 	}
-	}
+	// int wstatus;
+	// for (i = 0; i < nCommand - 1; i++) {
+	// 	if (wait(&wstatus) == -1) { ret_err("Wait error", 1); }
+	// 	if(WIFEXITED(wstatus)){
+	// 		int nstatus = WEXITSTATUS(wstatus);
+	// 		if (nstatus == 0){}
+	// 		else 
+	// 			printf("Faillure, code: %d", nstatus);
+	// }
+	// }
 	
 	return (0);
 }
