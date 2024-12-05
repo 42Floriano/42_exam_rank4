@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   sandbox.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: albertini <albertini@student.42.fr>        +#+  +:+       +#+        */
+/*   By: falberti <falberti@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 16:53:48 by albertini         #+#    #+#             */
-/*   Updated: 2024/12/03 23:32:46 by albertini        ###   ########.fr       */
+/*   Updated: 2024/12/05 12:38:05 by falberti         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,12 +17,12 @@
 #include <stdbool.h>
 #include <signal.h>
 
-void handle_alarm(int sig){
-	if (sig == SIGALRM){
-		printf("Timeout called\n");
-		exit(10);
-	}
-}
+// void handle_alarm(int sig){
+// 	if (sig == SIGALRM){
+// 		printf("Timeout called\n");
+// 		exit(10);
+// 	}
+// }
 
 void ret_err(char *msg, int err){
 	printf("%s", msg);
@@ -34,9 +34,9 @@ int sandbox(void (*f)(void), unsigned int timeout, bool verbose)
 	int fd = fork();
 	if (fd == -1){return (-1);}
 	if (fd == 0){
-		struct sigaction sa;
-		sa.sa_handler = &handle_alarm;
-		sigaction(SIGALRM, &sa, NULL);
+		// struct sigaction sa;
+		// sa.sa_handler = &handle_alarm;
+		// sigaction(SIGALRM, &sa, NULL);
 		alarm(timeout);
 		f();
 		//sleep(10);
@@ -44,10 +44,7 @@ int sandbox(void (*f)(void), unsigned int timeout, bool verbose)
 		int wstatus;
 		if (waitpid(-1, &wstatus, 0) == -1) {return (-1);};
         if (WIFEXITED(wstatus)) {
-			if(WEXITSTATUS(wstatus) == 10){
-				if (verbose){printf("Timeout after %d seconds", timeout);}
-				return (0);
-			} else if(WEXITSTATUS(wstatus) == 0){
+			if(WEXITSTATUS(wstatus) == 0){
 				if (verbose){printf("Nice function");}
 				return (1);
 			} else {
@@ -55,7 +52,11 @@ int sandbox(void (*f)(void), unsigned int timeout, bool verbose)
 				return (0);
 			}
         } else if (WIFSIGNALED(wstatus)) {
-            if (verbose){printf("Parent process: Child killed by signal %d.\n", WTERMSIG(wstatus));}
+			if ((WTERMSIG(wstatus) == 14) && verbose){
+				printf("Timeout after %d seconds", timeout);
+			} else if (verbose){
+				printf("Parent process: Child killed by signal %d.\n", WTERMSIG(wstatus));
+			}
 			return (0);
         }
 	}
