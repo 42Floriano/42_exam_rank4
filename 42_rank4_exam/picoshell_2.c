@@ -6,7 +6,7 @@
 /*   By: falberti <falberti@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/09 16:20:42 by falberti          #+#    #+#             */
-/*   Updated: 2024/12/10 15:53:43 by falberti         ###   ########.fr       */
+/*   Updated: 2024/12/10 17:38:21 by falberti         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,37 +25,41 @@ void ret_err(char *msg, int err)
 
 int picoshell(char **cmds[])
 {
-    int nCmd = 0, i = 0;
-    while(cmds[nCmd])
-        nCmd++;
-    if (nCmd == 0){ret_err("Enter at least one command!", -1);}
-    int pipes[nCmd - 1][2];
-    for (i = 0; i < nCmd - 1; i++){
-        if(pipe(pipes[i]) == -1){ret_err("error pipe", -1);}
+    int nComm = 0, i = 0;
+    while (cmds[nComm])
+        nComm++;
+    if(nComm < 1)
+        return (-1);
+    int pipes[nComm - 1][2];
+    for (i = 0; i < nComm - 1; i++){
+        pipe(pipes[i]);
     }
-    for (i = 0; i < nCmd; i++){
+    for(i = 0; i < nComm; i++){
         int pid = fork();
-        if (pid == -1){ret_err("error pid", -1);}
+        if (pid == -1){
+            //close pipie and error
+        }
         if (pid == 0){
-            if (i > 0){
+            if (i > 0)
                 dup2(pipes[i - 1][0], 0);
-            }
-            if (i < nCmd - 1){
+            if (i < nComm - 1)
                 dup2(pipes[i][1], 1);
-            }
-            for(int y = 0; y < nCmd - 1; y++){
+            for(int y = 0; y < nComm - 1; y++)
+            {   
                 close(pipes[y][0]);
                 close(pipes[y][1]);
             }
             execvp(cmds[i][0], cmds[i]);
         }
     }
-    for(i = 0; i < nCmd; i++){
+    for(i = 0; i < nComm - 1; i++)
+    {
         close(pipes[i][0]);
         close(pipes[i][1]);
     }
-    for(i = 0; i < nCmd; i++){
-        if (wait(NULL) == -1){ret_err("error wait", -1);}
+    for(i = 0; i < nComm; i++)
+    {
+        wait(NULL);
     }
     return(0);
 }

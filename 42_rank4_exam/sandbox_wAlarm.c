@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   sandbox_2.c                                        :+:      :+:    :+:   */
+/*   sandbox_wAlarm.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: falberti <falberti@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/09 14:10:53 by falberti          #+#    #+#             */
-/*   Updated: 2024/12/09 15:56:49 by falberti         ###   ########.fr       */
+/*   Updated: 2024/12/10 17:38:16 by falberti         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,7 +29,6 @@ void alarm_handler(int sig)
 
 int sandbox(void (*f)(void), unsigned int timeout, bool verbose)
 {
-    
     struct sigaction sa;
     sa.sa_handler = &alarm_handler;
     sa.sa_flags = SA_RESTART;
