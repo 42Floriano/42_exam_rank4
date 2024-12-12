@@ -6,7 +6,7 @@
 /*   By: falberti <falberti@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/05 12:45:42 by falberti          #+#    #+#             */
-/*   Updated: 2024/12/05 14:49:35 by falberti         ###   ########.fr       */
+/*   Updated: 2024/12/12 15:08:55 by falberti         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,10 +25,12 @@ double	calculate_distance(double x0, double x1, double y0, double y1)
 
 void	swap(int *a, int *b)
 {
-	int	temp;
-	temp = *a;
-	*a = *b;
-	*b = temp;
+	if (b != a)
+	{
+		*a = *a ^ *b;
+		*b = *a ^ *b;
+		*a = *a ^ *b;
+	}
 }
 
 void	find_shortest_path(int *perm, int start, int len, double x[], double y[], double *min_distance)

@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   picoshell_4.c                                      :+:      :+:    :+:   */
+/*   picoshell.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: albertini <albertini@student.42.fr>        +#+  +:+       +#+        */
+/*   By: falberti <falberti@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 10:14:10 by albertini         #+#    #+#             */
-/*   Updated: 2024/12/03 10:39:08 by albertini        ###   ########.fr       */
+/*   Updated: 2024/12/12 13:56:27 by falberti         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,9 @@ int picoshell(char **cmds[])
 		nComm++;
 	if (nComm < 1)
 		ret_err("Enter a least one commands", 1);
+		
 	int pipes[nComm - 1][2];
+	
 	for (i = 0; i < nComm - 1; i++){
 		if (pipe(pipes[i]) == -1) {ret_err("Error pipes", 1);}
 	}
