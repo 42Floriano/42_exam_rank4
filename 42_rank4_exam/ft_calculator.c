@@ -1,89 +1,170 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   ft_calculator.c                                    :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: falberti <falberti@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/12/12 15:56:38 by falberti          #+#    #+#             */
-/*   Updated: 2024/12/12 17:07:44 by falberti         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include <unistd.h>
-#include <stdio.h>
-#include <string.h>
+#include <stdbool.h>
 #include <stdlib.h>
-#include <ctype.h>
+#include <stdio.h>
 
-typedef struct t_data {
-    int g_pos;
-    char *g_input;
-    int o_par;
-    int c_par;
-} s_data;
-
-s_data g_data;
-
-void   init_data(){
-    g_data.g_pos = 0;
-    g_data.g_input = NULL;
-    g_data.o_par = 0;
-    g_data.c_par = 0;
-}
-
-int check_par(char *str){
-    int i = 0;
-    while(str[i]){
-        if (str[i] == '(')
-            g_data.o_par += 1;
-        if (str[i] == ')')
-            g_data.c_par += 1;
-        i++;
-    }
-    return g_data.o_par == g_data.c_par ? 1 : 0;
-}
-
-char *rm_space(char *str)
+typedef struct node
 {
-    int i = 0, y = 0;
-    char *ret = malloc(sizeof(char) * strlen(str) + 1);
-    if (ret == NULL)
-        return NULL;
-    while(str[i])
+	enum
+	{
+			ADD,
+			MULTI,
+			VAL
+	}		type;
+	int		val;
+	struct	node *l;
+	struct	node *r;
+} node;
+
+void destroy_tree(node *tree)
+{
+    if (!tree)
+        return ;
+    destroy_tree(tree->l);
+    destroy_tree(tree->r);
+    free(tree);
+}
+
+node	*new_node(node n)
+{
+	node	*ret = calloc(1, sizeof(node));
+	if (ret)
+		return (NULL);
+	*ret = n;
+	return (ret);
+}
+
+node *pars_expre(char **av){
+    node *left = NULL;
+    while (**av){
+        if (**av == '('){
+            (**av)++;
+            node *sub_n = pars_expre(av);
+            if (**av == ')')
+                return (NULL);
+            (*av)++;
+            if (left == NULL);
+                left = sub_n;
+
+        } else if(**av >= '0' && **av <= '9'){
+            node n = {.type = VAL, .val = **av -'0'};
+            (**av)++;
+            if (left == NULL)
+                left = new_node(n);
+
+        } else if( **av == '*'){
+            (**av)++;
+            node *r = pars_expre(av); 
+            node n = {.type = MULTI, .r = r, .l = left};
+            left = new_node(n);
+
+        } else if (**av == '+'){
+            (**av)++;
+            node *r = pars_expre(av);
+            node n = {.type = ADD, .r = r, .l = left};
+            left = new_node(n);
+        } else 
+            break ;
+    }
+    return (left);
+}
+
+node *parse_expr(char **av){
+    node *left = NULL;
+    while(**av){
+        if (**av == '('){
+            (**av)++;
+            node *sub_n = parse_expr(av);
+            if (**av == ')')
+                return (NULL);
+            (**av)++;
+            if(left == NULL)
+                left = sub_n;
+
+        } else if (**av >= '0' && **av <= '9'){
+            node n = {.type = VAL, .val = **av - '0'};
+            (**av++);
+            if (left == NULL)
+                left = new_node(n);
+        } else if (**av == '*'){
+            (**av)++;
+            node *r = parse_expr(av);
+            node n = {.type = MULTI, .l = left, .r = r};
+            left = new_node(n);
+
+        } else if (**av == '+'){
+            (**av)++;
+            node *r = parse_expr(av);
+            node n = {.type = ADD, .l = left, .r = r};
+            left = new_node(n);
+
+        } else 
+            break ;
+    }
+    return (left);
+}
+
+node *parse_expr(char **av)
+{
+    node *left = NULL;
+    while(**av)
     {
-        while (isspace(str[i]) && str[i])
-            i++;
-        while(str[i] && !isspace(str[i])){
-            ret[y] = str[i];
-            y++;
-            i++;
-        }
+        if(**av == '('){
+            (*av)++;
+            node *sub_n = parse_expr(av);
+            if (**av == ')')
+                return (NULL);
+            (*av)++;
+            if(left == NULL)
+                left = sub_n;
+        } else if (**av >= '0' && **av <= '9'){
+            node n = { .type = VAL, .val = **av -'0'};
+            (*av)++;
+            if (left == NULL)
+                left = new_node(n);
+
+        }else if (**av == '*'){
+            (*av)++;
+            node *r = parse_expr(av);
+            node n = {.type = MULTI, .l = left, .r = r};
+            left = new_node(n);
+
+        } else if (**av == '+'){
+            (*av)++;
+            node *r = parse_expr(av);
+            node n = {.type = ADD, .l = left, .r = r};
+            left = new_node(n);
+
+        } else 
+            break ;
     }
-    ret[y] = '\0';
-    return (ret);
+    return (left);
 }
 
-double rec(char *str){
-    double res;
-    return res;
-}
-
-double calculator(char *str){
-    double res = 0;
-    init_data();
-    printf("%s\n", str);
-    if (check_par(str)){g_data.g_input = rm_space(str);}
-    printf("%s\n", g_data.g_input);
-    return (res);
-}
-
-int main (int ac, char **av)
+int	eval_tree(node *tree)
 {
-    double res;
-    if (ac != 2)
-        return (1);
-    res = calculator(av[1]);
-    printf("%lf", res);
+    if (tree == NULL)
+        exit (1);
+	switch(tree->type)
+	{
+		case ADD:
+			return (eval_tree(tree->l) + eval_tree(tree->r));
+		case MULTI:
+			return (eval_tree(tree->l) * eval_tree(tree->r));
+		case VAL:
+			return (tree->val);
+	}
+    return (0);
+}
+
+int	main(int argc, char *argv[])
+{
+	if (argc != 2)
+		return (1);
+	node *tree = parse_expr(argv[1]);
+	if (!tree)
+		return (1);
+	printf("%d\n", eval_tree(tree));
+	destroy_tree(tree);
     return (0);
 }
