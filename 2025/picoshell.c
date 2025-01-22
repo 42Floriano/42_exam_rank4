@@ -6,7 +6,7 @@
 /*   By: floriano <floriano@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/12/03 10:14:10 by albertini         #+#    #+#             */
-/*   Updated: 2025/01/22 15:08:15 by floriano         ###   ########.fr       */
+/*   Updated: 2025/01/22 15:09:40 by floriano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,11 +29,6 @@ In the exam, a main file will be given to test your picoshell
 #include <stdlib.h>
 #include <sys/wait.h>
 #include <errno.h>
-
-void	ret_err(char *msg, int err){
-	perror(msg);
-	exit(err);
-}
 
 int picoshell(char **cmds[])
 {
