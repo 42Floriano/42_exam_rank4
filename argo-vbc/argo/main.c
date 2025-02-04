@@ -59,10 +59,10 @@ int	main(int argc, char **argv)
 	char *filename = argv[1];
 	FILE *stream = fopen(filename, "r");
 	json	file;
-	if (argo (&file, stream) != -1)
+	if (argo (&file, stream) != 1)
 	{
 		free_json(file);
-		return -1;
+		return 1;
 	}
 	serialize(file);
 	free_json(file);

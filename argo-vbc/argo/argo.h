@@ -29,7 +29,7 @@ typedef struct	pair {
 }	pair;
 
 void	free_json(json j);
-int 	pars_int(json dst, FILE *stream);
+int 	pars_int(json *dst, FILE *stream);
 char 	*pars_str(FILE *stream);
 int 	parser(json *dst, FILE *stream);
 int		argo(json *dst, FILE *stream);

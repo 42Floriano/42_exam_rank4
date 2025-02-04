@@ -126,42 +126,96 @@ int	expect(FILE *stream, char c)
 // }
 
 int pars_int(json *dst, FILE *stream){
-	int res = 0;
+	int res;
 	fscanf(stream, "%d", &res);
 	dst->type = INTEGER;
 	dst->integer = res;
 	return (1);
 }
 
-char pars_str(FILE *stream){
-	char *res = calloc(4096, sizeof(char));
+char *pars_str(FILE *stream){
+	char *res = calloc(4094, sizeof(char));
 	int i = 0;
 	char c = getc(stream);
-
 	while (1){
-		c = getc(stream);
-		if (c = '"')
-			break;
-		if (c = EOF){
+		getc(stream);
+		if (c == EOF){
 			unexpected(stream);
 			return NULL;
 		}
+		if (c == '"')
+			break ;
 		if (c == '\\')
-			c = getc(stream);
+			getc(stream);
 		res[i++] = c;
 	}
-	return (res);
+	return res;
 }
 
-int pars_map(*dst, FILE *stream){
+int pars_map(json *dst, FILE *stream){
+	dst->type = MAP;
+	dst->map.size = 0;
+	dst->map.data = NULL;
+	char c = getc(stream);
+
+	if (peek(stream) == '}')
+		return 1;
+	
+	while(1){
+		c = peek(stream);
+		if (c != '"')
+			return -1;
+		dst->map.data = realloc(dst->map.data, ((dst->map.size + 1) * sizeof(pair)));
+		pair *current = &dst->map.data[dst->map.size];
+		current->key = pars_str(stream);
+		if (current->key == NULL)
+			return -1;
+		dst->map.size++;
+		if (expect(stream, ':') == 0)
+			return -1;
+		if (argo(&current->value, stream) == -1)
+			return -1;
+		c = peek(stream);
+		if (c == '}'){
+			accept(stream, '}');
+			break ;
+		}
+		if (c == ','){
+			accept(stream, ',');
+		} else {
+			unexpected(stream);
+			return -1;
+		}
+
+	}
 	return (1);
 }
 
 int parser(json *dst, FILE *stream){
+	char c = peek(stream);
+	if (c == EOF){
+		unexpected(stream);
+		return (-1);
+	}
+	if (isdigit(c)){
+		return (pars_int(dst, stream));
+	} else if (c == '"'){
+		dst->type = STRING;
+		dst->string = pars_str(stream);
+		if (dst->string == NULL){
+			return (-1);
+		}
+	} else if (c == '{'){
+		return (pars_map(dst, stream));
+	} else {
+		unexpected(stream);
+		return -1;
+	}
 	return (1);
 }
+
 int	argo(json *dst, FILE *stream){
 	if (parser(dst, stream) == -1)
-		return -1;
-	return 1;
+		return (-1);
+	return (1);
 }
