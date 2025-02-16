@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Compile the program with strict warnings
-gcc -Wall -Wextra -Werror -gdwarf-4 -o vbc_parser vbc5.c
+# Compile the program with debugging enabled
+gcc -Wall -Wextra -Werror -g -o vbc_parser vbc5.c
 
 # Check if compilation succeeded
 if [ $? -ne 0 ]; then
@@ -50,33 +50,36 @@ declare -a tests=(
 )
 
 # Run tests
-echo "Running tests with Valgrind..."
+echo "Running tests with macOS memory leak detection..."
 total=${#tests[@]}
 pass=0
 mem_leak=0
 
 for test in "${tests[@]}"; do
-    input="${test%%|*}"  # Extract the expression
-    expected="${test##*|}"  # Extract the expected output
+    input="${test%%|*}"
+    expected="${test##*|}"
 
-    # Run the program under Valgrind to check for memory leaks
-    result=$(valgrind --leak-check=full --error-exitcode=123 --quiet ./vbc_parser "$input" 2>&1)
+    # Run the program in the background and get its PID
+    ./vbc_parser "$input" > output.txt 2>&1 &
+    pid=$!
 
-    # Extract actual output (excluding Valgrind messages)
-    actual=$(echo "$result" | grep -v "==" | tail -n 1)
+    # Wait for the process to finish
+    wait $pid
+    result=$(cat output.txt)
 
     # Compare actual and expected output
-    if [ "$actual" == "$expected" ]; then
-        echo "✅ PASS: '$input' -> $actual"
+    if [ "$result" == "$expected" ]; then
+        echo "✅ PASS: '$input' -> $result"
         ((pass++))
     else
         echo "❌ FAIL: '$input'"
         echo "   Expected: $expected"
-        echo "   Got:      $actual"
+        echo "   Got:      $result"
     fi
 
-    # Check for memory leaks (Valgrind exit code 123 indicates a memory leak)
-    if [ $? -eq 123 ]; then
+    # Check for memory leaks using macOS `leaks`
+    leaks_output=$(leaks $pid 2>&1)
+    if echo "$leaks_output" | grep -q "leaked"; then
         echo "   ⚠️ Memory leak detected in test: '$input'"
         ((mem_leak++))
     fi
