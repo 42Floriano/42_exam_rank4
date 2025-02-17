@@ -43,7 +43,7 @@ int pars_int(json *dst, FILE *stream){
 
 char *pars_str(FILE *stream){
 	int i = 0;
-	char res = calloc(4096, sizeof(char));
+	char *res = calloc(4096, sizeof(char));
 	if (res == NULL) return NULL;
 	char c = getc(stream);
 
@@ -68,11 +68,30 @@ int pars_map(json *dst, FILE *stream){
 	dst->map.data = NULL;
 	char c = getc(stream);
 
-
 	if (peek(stream) == '}')
 		return 1;
 	while(1){
-
+		c = peek(stream);
+		if (c != '"')
+			return -1;
+		dst->map.data = realloc(dst->map.data, (sizeof(pair) * dst->map.size + 1));
+		pair *current = &dst->map.data[dst->map.size];
+		current->key = pars_str(stream);
+		if (current->key == NULL) return -1;
+		dst->map.size++;
+		if(expect(stream, ':') == 0) return -1;
+		if (argo(&current->value, stream) == -1) return -1;
+		c = peek(stream);
+		if (c == '}'){
+			accept(stream, '}');
+			break ;
+		}
+		if (c == ','){
+			accept(stream, ',');
+		} else {
+			unexpected(stream);
+			return -1;
+		}
 	}
 	return 1;
 }
@@ -100,6 +119,55 @@ int parser(json *dst, FILE *stream){
 }
 
 int	argo(json *dst, FILE *stream){
-	if (parser(dst, stream) == -1) return -1;
-	return (1)
+	if (parser(dst, stream) == -1){
+		//unexpected(stream);
+		return -1;
+	}
+	return (1);
 }
+
+// // Test functions
+// void run_test(const char *input) {
+//     FILE *stream = fmemopen((void *)input, strlen(input), "r");
+//     if (!stream) {
+//         perror("fmemopen");
+//         exit(1);
+//     }
+
+//     json result;
+//     printf("Testing: %s\n", input);
+//     if (argo(&result, stream) == 1) {
+//         printf("Parsed successfully!\n");
+//     } else {
+//         printf("Parsing failed!\n");
+//     }
+//     fclose(stream);
+// }
+
+// void run_tests() {
+//     // Valid cases
+//     // run_test("1");
+//     // run_test("\"hello\"");
+//     // run_test("\"escape!\\\"\"");
+//     // run_test("{\"key\":123}");
+//     // run_test("{\"nested\":{\"inner\":42}}");
+//   //  run_test("{\"multiple\":1,\"values\":\"test\"}");
+//     run_test("{\"empty\":{}}");
+//     run_test("\"string with spaces\"");
+//     run_test("{\"greeting\":\"hello world\"}");
+
+//     // Invalid cases
+//     run_test("");
+//     run_test("123abc");
+//     run_test("\"unterminated");
+//     run_test("{\"key\":}");
+//     run_test("{\"missing\":42, }");
+//     run_test("{\"wrong\":{\"inner\":}}");
+//     run_test("{ key:\"value\"}"); // Invalid, missing quotes around key
+//     run_test("{\"space invalid\" :42}"); // Invalid space before colon
+// }
+
+// int main() {
+//     run_tests();
+//     return 0;
+// }
