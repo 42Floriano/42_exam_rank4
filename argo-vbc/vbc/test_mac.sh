@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Compile the program with debugging enabled
-gcc -Wall -Wextra -Werror -g -o vbc_parser vbc5.c
+gcc -Wall -Wextra -Werror -g -o vbc_parser vbc8.c
 
 # Check if compilation succeeded
 if [ $? -ne 0 ]; then
