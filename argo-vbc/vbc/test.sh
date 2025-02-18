@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Compile the program with strict warnings
-gcc -Wall -Wextra -Werror -gdwarf-4 -o vbc_parser vbc9.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -o vbc_parser vbc10.c
 
 # Check if compilation succeeded
 if [ $? -ne 0 ]; then
