@@ -23,6 +23,7 @@ This repository contains solutions and resources for the Rank 4 exam at 42. It i
 ---
 
 ## 📌 Level 1 Exercises
+Each exercise in `level_01` is a `.c` file containing its subject as comments within the file and a testable `main()` function.
 Each exercise in `level_01` is a `.c` file containing its subject and a testable `main()` function.
 
 ### 🚀 Compiling and Running Level 1 Exercises
