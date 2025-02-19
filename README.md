@@ -1,4 +1,4 @@
-# Rank 4 - 42 Exam Repository
+# Rank 4 (new) - 42 Exam Repository
 
 This repository contains solutions and resources for the Rank 4 exam at 42. It is structured into three main folders, each serving a distinct purpose.
 
