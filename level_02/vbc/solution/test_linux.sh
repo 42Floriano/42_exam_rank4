@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Compile the program with strict warnings
-gcc -Wall -Wextra -Werror -gdwarf-4 -o vbc_parser vbc10.c
+gcc -Wall -Wextra -Werror -gdwarf-4 -o vbc_parser vbc.c
 
 # Check if compilation succeeded
 if [ $? -ne 0 ]; then
@@ -36,6 +36,7 @@ declare -a tests=(
     "3**2|Unexpected token '*'"
     "3+*2|Unexpected token '*'"
     "(*2+3)|Unexpected token '*'"
+    "4+4)|Unexpected token ')'"
     "3+()|Unexpected token ')'"
     "3+(2*4|Unexpected end of file"
     ")|Unexpected token ')'"

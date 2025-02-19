@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   vbc10.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: falberti <falberti@student.42.fr>          +#+  +:+       +#+        */
+/*   By: floriano <floriano@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/12 13:50:59 by floriano          #+#    #+#             */
-/*   Updated: 2025/02/18 16:32:21 by falberti         ###   ########.fr       */
+/*   Updated: 2025/02/19 09:12:13 by floriano         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@ typedef struct node {
 }   node;
 
 char *input;
+int p_open = 0;
 
 node *parse_multi();
 node *parse_add();
@@ -79,6 +80,7 @@ int eval_tree(node *tree)
 node *parse_factor(){
     node *left = NULL;
     if(*input == '('){
+        p_open++;
         input++;
         node *sub_n = parse_add();
         if (sub_n == NULL) return NULL;
@@ -86,11 +88,16 @@ node *parse_factor(){
             unexpected(*input);
             return NULL;
         }
+        p_open--;
         input++;
         return sub_n;
     } else if (isdigit(*input)){
         node n = {.type = VAL, .val = *input - '0'};
         input++;
+        if (*input == ')' && p_open == 0){
+            unexpected(*input);
+            return NULL;
+        }
         return new_node(n);
     }
     unexpected(*input);

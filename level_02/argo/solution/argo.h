@@ -36,5 +36,5 @@ int		parse_map(json *dst, FILE *stream);
 int 	parser(json *dst, FILE *stream);
 int		argo(json *dst, FILE *stream);
 
-
 #endif
+

@@ -61,41 +61,6 @@ char 	*parse_str(FILE *stream){
     return res;
 }
 
-// int		parse_map(json *dst, FILE *stream){
-//     dst->type = MAP;
-//     dst->map.size = 0;
-//     dst->map.data = NULL;
-//     char c = getc(stream);
-
-//     if (peek(stream) ==  '}')
-//         return 1;
-//     while(1){
-//         c = peek(stream);
-//         if (c != '"')
-//             return -1;
-//         dst->map.data = realloc(dst->map.data, (dst->map.size + 1) * sizeof(pair));
-//         pair *current = &dst->map.data[dst->map.size];
-//         current->key = parse_str(stream);
-//         if (current->key == NULL) return -1;
-//         dst->map.size++;
-//         if(expect(stream, ':') == 0) return -1;
-//         if(argo(&current->value, stream) == -1) return -1;
-//         c = peek(stream);
-//         if (c == '}'){
-//             accept(stream, ':');
-//             break ;
-//         }
-//         if (c == ','){
-//             accept(stream, ',');
-//         } else {
-//             unexpected(stream);
-//             return -1;
-//         }
-
-//     }
-//     return 1;
-// }
-
 int parse_map(json *dst, FILE *stream){
     dst->type = MAP;
     dst->map.data = NULL;
@@ -156,49 +121,50 @@ int		argo(json *dst, FILE *stream){
     return parser(dst, stream);
 }
 
+// // Test functions -> run without the main.c for testing.
+// // run_test("123abc"); Will succeed even though it is an error. 
+// // you should NOT take care of this case in the exam anyway.
+// void run_test(const char *input) {
+//     FILE *stream = fmemopen((void *)input, strlen(input), "r");
+//     if (!stream) {
+//         perror("fmemopen");
+//         exit(1);
+//     }
 
-// Test functions
-void run_test(const char *input) {
-    FILE *stream = fmemopen((void *)input, strlen(input), "r");
-    if (!stream) {
-        perror("fmemopen");
-        exit(1);
-    }
+//     json result;
+//     printf("Testing: %s\n", input);
+//     if (argo(&result, stream) == 1) {
+//         printf("Parsed successfully!\n");
+//     } else {
+//         printf("Parsing failed!\n");
+//     }
+//     fclose(stream);
+// }
 
-    json result;
-    printf("Testing: %s\n", input);
-    if (argo(&result, stream) == 1) {
-        printf("Parsed successfully!\n");
-    } else {
-        printf("Parsing failed!\n");
-    }
-    fclose(stream);
-}
+// void run_tests() {
+//     // Valid cases
+//     run_test("1");
+//     run_test("\"hello\"");
+//     run_test("\"escape!\\\"\"");
+//     run_test("{\"key\":123}");
+//     run_test("{\"nested\":{\"inner\":42}}");
+//     run_test("{\"multiple\":1,\"values\":\"test\"}");
+//     run_test("{\"empty\":{}}");
+//     run_test("\"string with spaces\"");
+//     run_test("{\"greeting\":\"hello world\"}");
 
-void run_tests() {
-    // Valid cases
-    run_test("1");
-    run_test("\"hello\"");
-    run_test("\"escape!\\\"\"");
-    run_test("{\"key\":123}");
-    run_test("{\"nested\":{\"inner\":42}}");
-    run_test("{\"multiple\":1,\"values\":\"test\"}");
-    run_test("{\"empty\":{}}");
-    run_test("\"string with spaces\"");
-    run_test("{\"greeting\":\"hello world\"}");
+//     // Invalid cases
+//     run_test("");
+//     run_test("123abc");
+//     run_test("\"unterminated");
+//     run_test("{\"key\":}");
+//     run_test("{\"missing\":42,}");
+//     run_test("{\"wrong\":{\"inner\":}}");
+//     run_test("{ key:\"value\"}"); // Invalid, missing quotes around key
+//     run_test("{\"space invalid\": 42}"); // Invalid space before colon
+// }
 
-    // Invalid cases
-    run_test("");
-    run_test("123abc");
-    run_test("\"unterminated");
-    run_test("{\"key\":}");
-    run_test("{\"missing\":42,}");
-    run_test("{\"wrong\":{\"inner\":}}");
-    run_test("{ key:\"value\"}"); // Invalid, missing quotes around key
-    run_test("{\"space invalid\": 42}"); // Invalid space before colon
-}
-
-int main() {
-    run_tests();
-    return 0;
-}
+// int main() {
+//     run_tests();
+//     return 0;
+// }

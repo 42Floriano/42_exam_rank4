@@ -65,6 +65,7 @@ int	main(int argc, char **argv)
 		return 1;
 	}
 	serialize(file);
+	//free_json added
 	free_json(file);
 	printf("\n");
 	return (1);
